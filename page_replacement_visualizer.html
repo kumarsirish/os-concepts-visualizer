@@ -1,0 +1,341 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);color:var(--color-text-primary);background:transparent}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:16px}
+.label{font-size:11px;color:var(--color-text-secondary);letter-spacing:.06em;margin-bottom:6px;display:block}
+input[type=text],input[type=number],select{height:36px;padding:0 12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-family:var(--font-mono);outline:none;width:100%}
+button.primary{height:38px;padding:0 20px;border-radius:var(--border-radius-md);border:none;background:var(--color-text-primary);color:var(--color-background-primary);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-sans);letter-spacing:.02em;transition:opacity .15s}
+button.primary:hover{opacity:.82}
+button.primary:disabled{opacity:.35;cursor:default}
+.algo-btn{height:30px;padding:0 14px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);font-size:12px;cursor:pointer;font-family:var(--font-sans);transition:all .15s}
+.algo-btn.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+.preset-btn{height:26px;padding:0 10px;border-radius:4px;border:0.5px solid var(--color-border-tertiary);background:transparent;color:var(--color-text-secondary);font-size:11px;cursor:pointer;font-family:var(--font-sans)}
+.preset-btn:hover{background:var(--color-background-secondary)}
+.stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px;text-align:center}
+.stat-val{font-size:22px;font-weight:500;margin-top:2px}
+.frame-box{width:64px;height:64px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .35s;position:relative;overflow:visible}
+.frame-box.fault-new{border-color:#378ADD;background:#E6F1FB}
+.frame-box.evicted{border-color:#E24B4A;background:#FCEBEB}
+.frame-box.hit{border-color:#639922;background:#EAF3DE}
+.page-cell{width:36px;flex-shrink:0;text-align:center}
+.page-num{height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:13px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--color-text-secondary);font-family:var(--font-mono);transition:all .3s}
+.page-num.current{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary);font-weight:500}
+.page-num.done-hit{background:#EAF3DE;color:#27500A;border-color:#97C459}
+.page-num.done-fault{background:#FCEBEB;color:#791F1F;border-color:#F09595}
+.mem-cell{height:28px;display:flex;align-items:center;justify-content:center;margin-top:2px;border-radius:4px;font-size:11px;font-family:var(--font-mono);border:0.5px solid transparent;transition:all .3s}
+.mem-cell.occupied{background:var(--color-background-secondary);border-color:var(--color-border-tertiary);color:var(--color-text-primary)}
+.mem-cell.new{background:#E6F1FB;border-color:#85B7EB;color:#0C447C;font-weight:500}
+.reason-box{border-left:3px solid var(--color-border-secondary);padding:10px 14px;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;background:var(--color-background-secondary);font-size:13px;line-height:1.6;color:var(--color-text-primary);min-height:52px;transition:all .3s}
+.reason-box.hit-reason{border-color:#639922;background:#EAF3DE;color:#27500A}
+.reason-box.fault-reason{border-color:#E24B4A;background:#FCEBEB;color:#791F1F}
+.reason-box.evict-reason{border-color:#BA7517;background:#FAEEDA;color:#412402}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.13)}100%{transform:scale(1)}}
+.animate-in{animation:slideIn .3s ease}
+.animate-pop{animation:pop .35s ease}
+</style>
+
+<div style="padding:16px 0">
+
+<div class="card" style="margin-bottom:14px">
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+    <button class="algo-btn active" data-algo="FIFO">FIFO</button>
+    <button class="algo-btn" data-algo="LRU">LRU</button>
+    <button class="algo-btn" data-algo="OPT">OPT</button>
+    <button class="algo-btn" data-algo="LFU">LFU</button>
+    <button class="algo-btn" data-algo="MRU">MRU</button>
+    <button class="algo-btn" data-algo="CLOCK">Clock</button>
+  </div>
+  <div id="algo-desc" style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px;padding:8px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md)">First In First Out — always evicts the page that arrived earliest in memory.</div>
+  <div style="display:grid;grid-template-columns:1fr 80px;gap:10px;margin-bottom:12px">
+    <div>
+      <span class="label">Page reference string</span>
+      <input type="text" id="page-input" value="7 0 1 2 0 3 0 4 2 3 0 3 2" />
+    </div>
+    <div>
+      <span class="label">Frames</span>
+      <input type="number" id="frame-input" value="3" min="1" max="8" style="text-align:center" />
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+    <span style="font-size:11px;color:var(--color-text-secondary)">Presets:</span>
+    <button class="preset-btn" data-preset="7 0 1 2 0 3 0 4 2 3 0 3 2">Classic</button>
+    <button class="preset-btn" data-preset="1 2 3 4 1 2 5 1 2 3 4 5">Thrashing</button>
+    <button class="preset-btn" data-preset="1 2 3 4 5 1 2 3 4 5">Cyclic</button>
+    <button class="preset-btn" data-preset="1 1 2 1 3 1 2 1 4 1 2 3">Locality</button>
+  </div>
+  <button class="primary" id="run-btn" style="width:100%">Run simulation</button>
+</div>
+
+<div id="stats-row" style="display:none;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px"></div>
+
+<div id="timeline-section" style="display:none" class="card" style="margin-bottom:14px">
+  <span class="label">Reference timeline — click any step</span>
+  <div id="timeline" style="display:flex;gap:4px;overflow-x:auto;padding-bottom:6px;align-items:flex-start"></div>
+  <div style="display:flex;gap:14px;margin-top:10px;padding-top:10px;border-top:0.5px solid var(--color-border-tertiary)">
+    <span style="font-size:11px;color:var(--color-text-secondary);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#EAF3DE;border:0.5px solid #97C459"></span>Hit</span>
+    <span style="font-size:11px;color:var(--color-text-secondary);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#FCEBEB;border:0.5px solid #F09595"></span>Fault</span>
+    <span style="font-size:11px;color:var(--color-text-secondary);display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#E6F1FB;border:0.5px solid #85B7EB"></span>Newly loaded</span>
+  </div>
+</div>
+
+<div id="step-section" style="display:none">
+  <div class="card" style="margin-bottom:10px">
+    <span class="label">Frames at this step</span>
+    <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap" id="frame-viz"></div>
+  </div>
+  <div id="reason-container" style="margin-bottom:10px"></div>
+</div>
+
+</div>
+
+<script>
+const ALGOS={
+  FIFO:{desc:"First In First Out — always evicts the page that arrived earliest in memory.",run:(pages,F)=>{
+    const mem=[],q=[],steps=[];let hits=0,faults=0;
+    for(let i=0;i<pages.length;i++){
+      const p=pages[i],hit=mem.includes(p);let ev=null,reason="";
+      if(hit){hits++;reason=`Page ${p} is already in frame ${mem.indexOf(p)+1}. No replacement needed.`;}
+      else{faults++;
+        if(mem.length<F){mem.push(p);q.push(p);reason=`Page ${p} not in memory. Empty frame available — loaded into frame ${mem.length}.`;}
+        else{ev=q.shift();const idx=mem.indexOf(ev);mem.splice(idx,1);mem.push(p);q.push(p);
+          reason=`Page ${p} not in memory. FIFO evicts page ${ev} — it entered memory first (longest wait). Page ${p} loaded in its place.`;}
+      }
+      steps.push({page:p,hit,evicted:ev,mem:[...mem],reason});
+    }
+    return{steps,hits,faults};
+  }},
+  LRU:{desc:"Least Recently Used — evicts the page whose last access was furthest in the past.",run:(pages,F)=>{
+    const mem=[],order=[],steps=[];let hits=0,faults=0;
+    for(let i=0;i<pages.length;i++){
+      const p=pages[i],hit=mem.includes(p);let ev=null,reason="";
+      if(hit){hits++;order.splice(order.indexOf(p),1);order.push(p);
+        reason=`Page ${p} is in frame ${mem.indexOf(p)+1}. Marked as most recently used. No replacement.`;}
+      else{faults++;
+        if(mem.length<F){mem.push(p);order.push(p);reason=`Page ${p} not in memory. Empty frame available — loaded into frame ${mem.length}.`;}
+        else{ev=order.shift();mem.splice(mem.indexOf(ev),1);mem.push(p);order.push(p);
+          reason=`Page ${p} not in memory. LRU evicts page ${ev} — it was accessed longest ago among [${mem.join(", ")}${ev?", "+ev:""}]. Page ${p} takes its place.`;}
+      }
+      steps.push({page:p,hit,evicted:ev,mem:[...mem],reason,extra:{order:[...order]}});
+    }
+    return{steps,hits,faults};
+  }},
+  OPT:{desc:"Optimal (Bélády's) — evicts the page that won't be needed for the longest time ahead.",run:(pages,F)=>{
+    const mem=[],steps=[];let hits=0,faults=0;
+    for(let i=0;i<pages.length;i++){
+      const p=pages[i],hit=mem.includes(p);let ev=null,reason="";
+      if(hit){hits++;reason=`Page ${p} is in frame ${mem.indexOf(p)+1}. No replacement needed.`;}
+      else{faults++;
+        if(mem.length<F){mem.push(p);reason=`Page ${p} not in memory. Empty frame available — loaded into frame ${mem.length}.`;}
+        else{
+          const nu=mem.map(q=>{const idx=pages.indexOf(q,i+1);return idx===-1?Infinity:idx;});
+          const mi=nu.indexOf(Math.max(...nu));ev=mem[mi];
+          const evNext=nu[mi]===Infinity?`never used again`:`next used at step ${nu[mi]+1}`;
+          const details=mem.map((q,j)=>`${q}:${nu[j]===Infinity?"∞":nu[j]+1}`).join(", ");
+          mem.splice(mi,1);mem.push(p);
+          reason=`Page ${p} not in memory. OPT looks ahead: [${details}]. Page ${ev} is ${evNext} — furthest future use, so it's evicted.`;
+        }
+      }
+      steps.push({page:p,hit,evicted:ev,mem:[...mem],reason});
+    }
+    return{steps,hits,faults};
+  }},
+  LFU:{desc:"Least Frequently Used — evicts the page that has been accessed the fewest total times.",run:(pages,F)=>{
+    const mem=[],freq={},steps=[];let hits=0,faults=0;
+    for(let i=0;i<pages.length;i++){
+      const p=pages[i],hit=mem.includes(p);let ev=null,reason="";
+      freq[p]=(freq[p]||0)+(hit?1:1);
+      if(hit){hits++;reason=`Page ${p} is in frame ${mem.indexOf(p)+1}. Frequency now ${freq[p]}. No replacement.`;}
+      else{faults++;
+        if(mem.length<F){mem.push(p);reason=`Page ${p} not in memory. Empty frame available — loaded into frame ${mem.length}. Frequency: ${freq[p]}.`;}
+        else{let minF=Infinity,victim=mem[0];
+          for(const q of mem)if((freq[q]||0)<minF){minF=freq[q]||0;victim=q;}
+          ev=victim;mem.splice(mem.indexOf(ev),1);mem.push(p);
+          const freqStr=mem.map(q=>`${q}(${freq[q]||0})`).join(", ");
+          reason=`Page ${p} not in memory. LFU checks frequencies — page ${ev} has lowest (${freq[ev]||0} uses). Frequencies: [${freqStr}${ev?`, ${ev}(${freq[ev]||0})`:""}]. Page ${ev} evicted.`;
+        }
+      }
+      steps.push({page:p,hit,evicted:ev,mem:[...mem],reason,extra:{freq:{...freq}}});
+    }
+    return{steps,hits,faults};
+  }},
+  MRU:{desc:"Most Recently Used — evicts the most recently used page (useful for cyclic patterns).",run:(pages,F)=>{
+    const mem=[],order=[],steps=[];let hits=0,faults=0;
+    for(let i=0;i<pages.length;i++){
+      const p=pages[i],hit=mem.includes(p);let ev=null,reason="";
+      if(hit){hits++;order.splice(order.indexOf(p),1);order.push(p);
+        reason=`Page ${p} is in frame ${mem.indexOf(p)+1}. It's now the most recently used. No replacement.`;}
+      else{faults++;
+        if(mem.length<F){mem.push(p);order.push(p);reason=`Page ${p} not in memory. Empty frame available — loaded into frame ${mem.length}.`;}
+        else{ev=order.pop();mem.splice(mem.indexOf(ev),1);mem.push(p);order.push(p);
+          reason=`Page ${p} not in memory. MRU evicts page ${ev} — it was the most recently used page. Useful when recently used pages are unlikely to be reused soon.`;}
+      }
+      steps.push({page:p,hit,evicted:ev,mem:[...mem],reason,extra:{order:[...order]}});
+    }
+    return{steps,hits,faults};
+  }},
+  CLOCK:{desc:"Clock (Second Chance) — circular buffer; gives pages a second chance via a reference bit before eviction.",run:(pages,F)=>{
+    const mem=new Array(F).fill(null),bits=new Array(F).fill(0),steps=[];
+    let ptr=0,hits=0,faults=0;
+    for(let i=0;i<pages.length;i++){
+      const p=pages[i],hit=mem.includes(p);let ev=null,reason="";
+      if(hit){bits[mem.indexOf(p)]=1;hits++;
+        reason=`Page ${p} found in frame ${mem.indexOf(p)+1}. Reference bit set to 1 (second chance granted). Clock hand at frame ${ptr+1}.`;}
+      else{faults++;
+        let swept=0;
+        while(bits[ptr]===1){bits[ptr]=0;swept++;ptr=(ptr+1)%F;}
+        if(mem[ptr]!==null){ev=mem[ptr];
+          reason=`Page ${p} not in memory. Clock hand at frame ${ptr+1}: page ${ev} has ref bit=0 — evicted. ${swept>0?`Swept ${swept} frame(s) with ref bit=1 (cleared to 0) before finding victim.`:"Victim found immediately."}`;
+        }else{reason=`Page ${p} not in memory. Empty frame ${ptr+1} found — loaded directly.`;}
+        mem[ptr]=p;bits[ptr]=1;ptr=(ptr+1)%F;
+      }
+      steps.push({page:p,hit,evicted:ev,mem:[...mem],reason,extra:{bits:[...bits],ptr}});
+    }
+    return{steps,hits,faults};
+  }}
+};
+
+const DESCS={FIFO:"First In First Out — always evicts the page that arrived earliest in memory.",LRU:"Least Recently Used — evicts the page whose last access was furthest in the past.",OPT:"Optimal (Bélády's) — evicts the page that won't be needed for the longest time ahead.",LFU:"Least Frequently Used — evicts the page that has been accessed the fewest total times.",MRU:"Most Recently Used — evicts the most recently used page (useful for cyclic patterns).",CLOCK:"Clock (Second Chance) — circular buffer; gives pages a second chance via a reference bit before eviction."};
+
+let currentAlgo="FIFO",result=null,currentStep=-1,autoTimer=null;
+
+document.querySelectorAll(".algo-btn").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll(".algo-btn").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    currentAlgo=b.dataset.algo;
+    document.getElementById("algo-desc").textContent=DESCS[currentAlgo];
+  });
+});
+document.querySelectorAll(".preset-btn").forEach(b=>{
+  b.addEventListener("click",()=>{document.getElementById("page-input").value=b.dataset.preset;});
+});
+
+document.getElementById("run-btn").addEventListener("click",()=>{
+  const raw=document.getElementById("page-input").value.trim().split(/\s+/).map(Number).filter(n=>!isNaN(n));
+  const F=Math.max(1,Math.min(8,parseInt(document.getElementById("frame-input").value)||3));
+  if(!raw.length)return;
+  result=ALGOS[currentAlgo].run(raw,F);
+  currentStep=-1;
+  if(autoTimer){clearInterval(autoTimer);autoTimer=null;}
+  buildTimeline(raw,F);
+  document.getElementById("stats-row").style.display="grid";
+  renderStats();
+  document.getElementById("step-section").style.display="none";
+  document.getElementById("timeline-section").style.display="block";
+  startAutoPlay(F);
+});
+
+function renderStats(){
+  const s=result;const total=s.steps.length;
+  document.getElementById("stats-row").innerHTML=
+    stat("Total pages",total,"var(--color-text-primary)")+
+    stat("Page faults",s.faults,"#A32D2D")+
+    stat("Page hits",s.hits,"#27500A")+
+    stat("Hit rate",Math.round(s.hits/total*100)+"%","#0C447C");
+}
+function stat(l,v,c){return`<div class="stat"><div style="font-size:11px;color:var(--color-text-secondary)">${l}</div><div class="stat-val" style="color:${c}">${v}</div></div>`;}
+
+function buildTimeline(pages,F){
+  const tl=document.getElementById("timeline");
+  tl.innerHTML="";
+  pages.forEach((p,i)=>{
+    const col=document.createElement("div");
+    col.className="page-cell";
+    col.style.cursor="pointer";
+    const pn=document.createElement("div");
+    pn.className="page-num";
+    pn.id=`pn-${i}`;
+    pn.textContent=p;
+    col.appendChild(pn);
+    const tick=document.createElement("div");
+    tick.id=`tick-${i}`;
+    tick.style.cssText="height:5px;border-radius:2px;margin-top:3px;background:var(--color-border-tertiary)";
+    col.appendChild(tick);
+    for(let f=0;f<F;f++){
+      const mc=document.createElement("div");
+      mc.className="mem-cell";
+      mc.id=`mc-${i}-${f}`;
+      col.appendChild(mc);
+    }
+    col.addEventListener("click",()=>gotoStep(i));
+    tl.appendChild(col);
+  });
+}
+
+function startAutoPlay(F){
+  let s=-1;
+  autoTimer=setInterval(()=>{
+    s++;
+    if(s>=result.steps.length){clearInterval(autoTimer);autoTimer=null;return;}
+    gotoStep(s);
+  },900);
+}
+
+function gotoStep(idx){
+  if(!result)return;
+  const st=result.steps[idx];
+  const F=st.mem.length;
+  currentStep=idx;
+  for(let i=0;i<result.steps.length;i++){
+    const s=result.steps[i];
+    const pn=document.getElementById(`pn-${i}`);
+    const tk=document.getElementById(`tick-${i}`);
+    if(!pn)continue;
+    pn.className="page-num"+(i===idx?" current":i<idx?(s.hit?" done-hit":" done-fault"):"");
+    if(tk)tk.style.background=i<idx?(s.hit?"#97C459":"#F09595"):"var(--color-border-tertiary)";
+    for(let f=0;f<F;f++){
+      const mc=document.getElementById(`mc-${i}-${f}`);
+      if(!mc)continue;
+      const val=i<=idx?s.mem[f]:undefined;
+      mc.textContent=val!=null?val:"";
+      mc.className="mem-cell"+(val!=null?((!s.hit&&val===s.page&&i===idx)?" new":" occupied"):"");
+    }
+  }
+  if(idx>=0){document.getElementById(`pn-${idx}`)?.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});}
+  renderFrameViz(st,F);
+  renderReason(st);
+  document.getElementById("step-section").style.display="block";
+}
+
+function renderFrameViz(st,F){
+  const viz=document.getElementById("frame-viz");
+  viz.innerHTML="";
+  for(let f=0;f<F;f++){
+    const val=st.mem[f];
+    const isNew=!st.hit&&val===st.page;
+    const isEvicted=false;
+    const box=document.createElement("div");
+    box.className="frame-box animate-pop"+(isNew?" fault-new":st.hit&&val===st.page?" hit":"");
+    box.innerHTML=`<div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:4px">F${f+1}</div><div style="font-size:22px;font-weight:500;color:${isNew?"#185FA5":val!=null?"var(--color-text-primary)":"var(--color-text-secondary)"}">${val!=null?val:"—"}</div>`;
+    if(currentAlgo==="CLOCK"&&st.extra?.bits){
+      const badge=document.createElement("div");
+      badge.style.cssText=`position:absolute;top:-8px;right:-8px;font-size:10px;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;background:${st.extra.bits[f]?"#EAF3DE":"#F1EFE8"};color:${st.extra.bits[f]?"#27500A":"#5F5E5A"};border:0.5px solid ${st.extra.bits[f]?"#97C459":"#B4B2A9"}`;
+      badge.textContent=st.extra.bits[f];
+      box.appendChild(badge);
+    }
+    viz.appendChild(box);
+  }
+  if(st.evicted!=null){
+    const arrow=document.createElement("div");
+    arrow.style.cssText="display:flex;align-items:center;gap:10px;margin-left:8px;padding:10px 14px;background:#FAEEDA;border-radius:var(--border-radius-md);border:0.5px solid #EF9F27";
+    arrow.innerHTML=`<div><div style="font-size:10px;color:#854F0B">evicted</div><div style="font-size:20px;font-weight:500;color:#633806">${st.evicted}</div></div><div style="color:#B4B2A9;font-size:16px">→</div><div><div style="font-size:10px;color:#0C447C">loaded</div><div style="font-size:20px;font-weight:500;color:#185FA5">${st.page}</div></div>`;
+    viz.appendChild(arrow);
+  }
+}
+
+function renderReason(st){
+  const c=document.getElementById("reason-container");
+  const cls=st.hit?"hit-reason":"fault-reason";
+  c.innerHTML=`<div class="reason-box ${cls} animate-in"><strong style="font-size:12px;display:block;margin-bottom:3px">${st.hit?"Page hit":"Page fault"} — page ${st.page}</strong>${st.reason}</div>`;
+  if(st.evicted!=null){
+    const d=document.createElement("div");
+    d.className="reason-box evict-reason animate-in";
+    d.style.marginTop="6px";
+    const algoExplain={FIFO:`FIFO rule: the oldest page in the queue is always removed first.`,LRU:`LRU rule: the page unused for the longest time is evicted.`,OPT:`OPT rule: the page furthest from its next use is evicted — theoretically optimal.`,LFU:`LFU rule: the page with the fewest accesses is evicted.`,MRU:`MRU rule: the most recently used page is evicted.`,CLOCK:`Clock rule: the hand sweeps and clears reference bits; the first page with bit=0 is evicted.`};
+    d.innerHTML=`<strong style="font-size:12px;display:block;margin-bottom:3px">Why page ${st.evicted} was chosen</strong>${algoExplain[currentAlgo]}`;
+    c.appendChild(d);
+  }
+}
+</script>
