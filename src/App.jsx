@@ -302,7 +302,7 @@ export default function App() {
 
         {/* Top bar: home + title */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18, paddingBottom: 14, borderBottom: `1px solid ${theme.border}` }}>
-          <a href="/" title="Back to Home" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: 8, border: `1px solid ${theme.border}`, background: theme.panel, color: theme.text, textDecoration: "none", flexShrink: 0 }}>
+          <a href="./" title="Back to Home" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: 8, border: `1px solid ${theme.border}`, background: theme.panel, color: theme.text, textDecoration: "none", flexShrink: 0 }}>
             <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 2 8h1v5a1 1 0 0 0 1 1h2.5a.5.5 0 0 0 .5-.5V11h2v2.5a.5.5 0 0 0 .5.5H11a1 1 0 0 0 1-1V8h1a.5.5 0 0 0 .354-.854l-6-6z"/></svg>
           </a>
           <div>

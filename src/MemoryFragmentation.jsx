@@ -521,7 +521,7 @@ export default function App() {
         gap: 14,
         boxShadow: "0 2px 12px rgba(0,0,0,0.3)",
       }}>
-        <a href="/" title="Back to Home" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: 8, border: "1px solid #2D3E54", background: "#1E2D42", color: "#F1F5F9", textDecoration: "none", flexShrink: 0 }}>
+        <a href="./" title="Back to Home" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: 8, border: "1px solid #2D3E54", background: "#1E2D42", color: "#F1F5F9", textDecoration: "none", flexShrink: 0 }}>
           <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 2 8h1v5a1 1 0 0 0 1 1h2.5a.5.5 0 0 0 .5-.5V11h2v2.5a.5.5 0 0 0 .5.5H11a1 1 0 0 0 1-1V8h1a.5.5 0 0 0 .354-.854l-6-6z"/></svg>
         </a>
         <div style={{ fontSize: 28 }}>🧠</div>

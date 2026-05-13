@@ -34,10 +34,10 @@ export default function HomePage() {
         <div style={{ display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "center", alignItems: "stretch", padding: "0 32px 60px" }}>
 
           {[
-            { href: "/page-replacement.html", icon: "🔄", iconBg: "#dbeafe", title: "Page Replacement",    desc: "Visualise FIFO, LRU, Optimal and more — step by step with hit/fault tracking.",                        linkColor: "#0969da" },
-            { href: "/memory.html",           icon: "🧠", iconBg: "#e7f6ec", title: "Memory Fragmentation", desc: "Explore internal and external memory fragmentation with live animations.",                           linkColor: "#1a7f37" },
-            { href: "/paging.html",           icon: "📋", iconBg: "#f0ebff", title: "Address Translation",  desc: "See how logical addresses map to physical memory via page tables and segmentation.",                  linkColor: "#6e40c9" },
-            { href: "/syscall.html",          icon: "⚡", iconBg: "#fff8e1", title: "System Call Flow",      desc: "Animate how open/read/write cross from user space into the Linux kernel and back.", linkColor: "#9a6700" },
+            { href: "./page-replacement.html", icon: "🔄", iconBg: "#dbeafe", title: "Page Replacement",    desc: "Visualise FIFO, LRU, Optimal and more — step by step with hit/fault tracking.",                        linkColor: "#0969da" },
+            { href: "./memory.html",           icon: "🧠", iconBg: "#e7f6ec", title: "Memory Fragmentation", desc: "Explore internal and external memory fragmentation with live animations.",                           linkColor: "#1a7f37" },
+            { href: "./paging.html",           icon: "📋", iconBg: "#f0ebff", title: "Address Translation",  desc: "See how logical addresses map to physical memory via page tables and segmentation.",                  linkColor: "#6e40c9" },
+            { href: "./syscall.html",          icon: "⚡", iconBg: "#fff8e1", title: "System Call Flow",      desc: "Animate how open/read/write cross from user space into the Linux kernel and back.", linkColor: "#9a6700" },
           ].map(({ href, icon, iconBg, title, desc, linkColor }) => (
             <a key={href} href={href} style={{ display: "flex", width: 240 }}>
               <div className="card" style={{

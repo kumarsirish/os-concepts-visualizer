@@ -295,7 +295,7 @@ const ZONE_ORDER = ["user", "kernel", "hardware"];
 
 function HomeButton() {
   return (
-    <a href="/" title="Back to Home" style={{
+    <a href="./" title="Back to Home" style={{
       display: "inline-flex", alignItems: "center", justifyContent: "center",
       width: 34, height: 34, borderRadius: 8, border: `1px solid ${th.border}`,
       background: th.panel, color: th.text, textDecoration: "none", flexShrink: 0,
