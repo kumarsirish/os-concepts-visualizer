@@ -526,7 +526,7 @@ export default function App() {
         </a>
         <div style={{ fontSize: 28 }}>🧠</div>
         <div>
-          <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, color: "#F1F5F9", letterSpacing: "-0.01em" }}>
+          <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 28, color: "#F1F5F9", letterSpacing: "-0.01em" }}>
             Memory Fragmentation Simulator
           </div>
           <div style={{ fontSize: 12, color: "#64748B", marginTop: 1 }}>

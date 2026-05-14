@@ -300,7 +300,7 @@ function HomeButton() {
 }
 
 // Animated packet badge moving down/up
-function PacketBadge({ dir, phase }) {
+function PacketBadge({ phase }) {
   const isRequest = phase === "request";
   return (
     <div style={{
@@ -321,16 +321,16 @@ function ModeSwitchDivider({ crossing, flashKey }) {
   const active = crossing != null;
   return (
     <div key={flashKey} style={{
-      margin: "6px 0",
-      padding: "8px 16px",
+      margin: "3px 0",
+      padding: "5px 12px",
       background: active ? "#fef9c3" : th.panelAlt,
       border: `2px dashed ${active ? "#ca8a04" : th.border}`,
-      borderRadius: 8,
-      display: "flex", alignItems: "center", gap: 10,
+      borderRadius: 6,
+      display: "flex", alignItems: "center", gap: 8,
       transition: "background 0.4s, border-color 0.4s",
       animation: active ? "modePulse 0.6s ease" : "none",
     }}>
-      <span style={{ fontSize: 14, fontWeight: 700, color: active ? "#92400e" : th.muted, fontFamily: mono }}>
+      <span style={{ fontSize: 12, fontWeight: 700, color: active ? "#92400e" : th.muted, fontFamily: mono }}>
         ⚡ {active
           ? (crossing === "user→kernel" ? "Ring 3 → Ring 0" : "Ring 0 → Ring 3")
           : "CPU MODE SWITCH BOUNDARY"}
@@ -343,11 +343,11 @@ function ModeSwitchDivider({ crossing, flashKey }) {
 function HwDivider() {
   return (
     <div style={{
-      margin: "6px 0", padding: "8px 16px",
+      margin: "3px 0", padding: "5px 12px",
       background: th.panelAlt, border: `2px dashed ${th.border}`,
-      borderRadius: 8, display: "flex", alignItems: "center",
+      borderRadius: 6, display: "flex", alignItems: "center",
     }}>
-      <span style={{ fontSize: 14, fontWeight: 700, color: th.muted, fontFamily: mono }}>🔩 HARDWARE BOUNDARY</span>
+      <span style={{ fontSize: 12, fontWeight: 700, color: th.muted, fontFamily: mono }}>🔩 HARDWARE BOUNDARY</span>
     </div>
   );
 }
@@ -357,21 +357,21 @@ function LayerCard({ layer, active, phase }) {
   const zone = ZONES[layer.zone];
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: 14,
-      padding: "12px 16px",
-      borderRadius: 8,
+      display: "flex", alignItems: "center", gap: 10,
+      padding: "7px 12px",
+      borderRadius: 7,
       border: `2px solid ${active ? (phase === "request" ? th.blue : th.green) : zone.border}`,
       background: active ? (phase === "request" ? th.blueSoft : th.greenSoft) : zone.bg,
-      boxShadow: active ? `0 0 0 3px ${phase === "request" ? "#bfdbfe" : "#bbf7d0"}` : "none",
+      boxShadow: active ? `0 0 0 2px ${phase === "request" ? "#bfdbfe" : "#bbf7d0"}` : "none",
       transition: "all 0.3s ease",
-      transform: active ? "scale(1.012)" : "scale(1)",
+      transform: active ? "scale(1.01)" : "scale(1)",
     }}>
-      <div style={{ fontSize: 24, flexShrink: 0 }}>{layer.icon}</div>
+      <div style={{ fontSize: 18, flexShrink: 0 }}>{layer.icon}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 16, fontWeight: 700, color: active ? (phase === "request" ? th.blue : th.green) : th.text, transition: "color 0.3s" }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: active ? (phase === "request" ? th.blue : th.green) : th.text, transition: "color 0.3s" }}>
           {layer.label}
         </div>
-        <div style={{ fontSize: 13, color: th.muted, marginTop: 2 }}>{layer.sub}</div>
+        <div style={{ fontSize: 11, color: th.muted, marginTop: 1 }}>{layer.sub}</div>
       </div>
     </div>
   );
@@ -390,7 +390,6 @@ function LayerStack({ step }) {
     if (crossing) setFlashKey(k => k + 1);
   }, [crossing, step]);
 
-  let prevZone = null;
   const elements = [];
 
   for (const zoneName of ZONE_ORDER) {
@@ -416,15 +415,15 @@ function LayerStack({ step }) {
       <div key={zoneName} style={{
         background: zone.bg,
         border: `1px solid ${zone.border}`,
-        borderRadius: 10, padding: "12px 12px 12px 22px", marginBottom: 4,
+        borderRadius: 8, padding: "8px 8px 8px 16px", marginBottom: 3,
       }}>
         {/* Zone label */}
-        <div style={{ fontSize: 13, fontWeight: 700, color: zone.color, letterSpacing: 1, marginBottom: 10, fontFamily: mono, display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ width: 9, height: 9, borderRadius: "50%", background: zone.color, display: "inline-block" }} />
+        <div style={{ fontSize: 11, fontWeight: 700, color: zone.color, letterSpacing: 1, marginBottom: 6, fontFamily: mono, display: "flex", alignItems: "center", gap: 5 }}>
+          <span style={{ width: 7, height: 7, borderRadius: "50%", background: zone.color, display: "inline-block" }} />
           {zone.label} {zone.ring && <span style={{ fontWeight: 400, color: th.muted }}>({zone.ring})</span>}
         </div>
         {/* Layer cards */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
           {zoneLayers.map(layer => (
             <LayerCard
               key={layer.id}
@@ -440,7 +439,7 @@ function LayerStack({ step }) {
   }
 
   return (
-    <div style={{ flex: "0 0 52%", display: "flex", flexDirection: "column", gap: 0 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 0, overflowY: "auto", height: "100%" }}>
       {elements}
     </div>
   );
@@ -452,26 +451,26 @@ function StepDetail({ step, total, onPrev, onNext, playing, onPlay }) {
   const isRequest = s.phase === "request";
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 16 }}>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12, overflow: "hidden" }}>
       {/* Progress */}
-      <div style={{ background: th.panel, border: `1px solid ${th.border}`, borderRadius: 8, padding: "14px 18px", boxShadow: th.shadow }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+      <div style={{ background: th.panel, border: `1px solid ${th.border}`, borderRadius: 8, padding: "10px 16px", boxShadow: th.shadow, flexShrink: 0 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
           <span style={{ fontSize: 13, fontWeight: 700, color: th.muted, letterSpacing: 1, fontFamily: mono }}>STEP {step + 1} / {total}</span>
           <PacketBadge dir={s.dir} phase={s.phase} />
         </div>
-        <div style={{ height: 5, background: th.panelAlt, borderRadius: 3, overflow: "hidden" }}>
-          <div style={{ height: "100%", borderRadius: 3, background: isRequest ? th.blue : th.green, width: `${((step + 1) / total) * 100}%`, transition: "width 0.3s ease" }} />
+        <div style={{ height: 4, background: th.panelAlt, borderRadius: 2, overflow: "hidden" }}>
+          <div style={{ height: "100%", borderRadius: 2, background: isRequest ? th.blue : th.green, width: `${((step + 1) / total) * 100}%`, transition: "width 0.3s ease" }} />
         </div>
       </div>
 
       {/* Title + detail */}
-      <div style={{ background: th.panel, border: `1px solid ${th.border}`, borderRadius: 8, padding: "18px 20px", boxShadow: th.shadow }}>
-        <div style={{ fontSize: 20, fontWeight: 700, color: th.text, marginBottom: 12, fontFamily: mono }}>{s.title}</div>
-        <div style={{ fontSize: 15, color: th.muted, lineHeight: 1.8 }}>{s.detail}</div>
+      <div style={{ background: th.panel, border: `1px solid ${th.border}`, borderRadius: 8, padding: "16px 20px", boxShadow: th.shadow, flex: 1, overflow: "auto" }}>
+        <div style={{ fontSize: 18, fontWeight: 700, color: th.text, marginBottom: 10, fontFamily: mono }}>{s.title}</div>
+        <div style={{ fontSize: 14, color: th.muted, lineHeight: 1.8 }}>{s.detail}</div>
       </div>
 
       {/* Navigation */}
-      <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
         <button onClick={onPrev} disabled={step === 0} style={{
           ...navBtn, opacity: step === 0 ? 0.4 : 1,
         }}>◀ Prev</button>
@@ -479,7 +478,7 @@ function StepDetail({ step, total, onPrev, onNext, playing, onPlay }) {
           ...navBtn,
           background: playing ? th.redSoft : th.greenSoft,
           borderColor: playing ? th.red : th.green,
-          color: th.text, minWidth: 100,
+          color: th.text, minWidth: 90,
         }}>
           {playing ? "⏸ Pause" : "▶ Play"}
         </button>
@@ -536,65 +535,48 @@ export default function SystemCallFlow() {
         }
       `}</style>
 
-      <div style={{ fontFamily: mono, background: th.bg, minHeight: "100vh", color: th.text }}>
+      <div style={{ fontFamily: mono, background: th.bg, height: "100vh", color: th.text, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         {/* Header */}
-        <div style={{ background: th.panel, borderBottom: `1px solid ${th.border}`, padding: "14px 24px" }}>
-          <div style={{ maxWidth: 1080, margin: "0 auto", display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ background: th.panel, borderBottom: `1px solid ${th.border}`, padding: "10px 24px", flexShrink: 0 }}>
+          <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", gap: 12 }}>
             <HomeButton />
             <div>
-              <div style={{ fontWeight: 700, fontSize: 22, color: th.text }}>System Call Flow</div>
-              <div style={{ fontSize: 14, color: th.muted, marginTop: 2 }}>
-                How open/read/write cross from user space into the Linux kernel and back
-              </div>
+              <div style={{ fontWeight: 700, fontSize: 28, color: th.text }}>System Call Flow</div>
+              <div style={{ fontSize: 12, color: th.muted, marginTop: 1 }}>How open/read/write cross from user space into the Linux kernel and back</div>
             </div>
           </div>
         </div>
 
-        <div style={{ maxWidth: 1080, margin: "0 auto", padding: "20px 24px 48px" }}>
-
-          {/* Main content: two columns */}
-          <div style={{ display: "flex", gap: 20, alignItems: "flex-start", flexWrap: "wrap" }}>
-            {/* Left: layer stack */}
-            <div style={{ flex: "0 0 460px", minWidth: 300 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: th.muted, letterSpacing: 1, marginBottom: 10, fontFamily: mono }}>
-                SYSTEM LAYERS
-              </div>
-              <LayerStack step={step} />
-            </div>
-
-            {/* Right: step details */}
-            <div style={{ flex: 1, minWidth: 280, display: "flex", flexDirection: "column", gap: 14 }}>
-              <StepDetail
-                step={step}
-                total={STEPS.length}
-                onPrev={() => { setPlaying(false); setStep(s => Math.max(0, s - 1)); }}
-                onNext={() => { setPlaying(false); setStep(s => Math.min(STEPS.length - 1, s + 1)); }}
-                playing={playing}
-                onPlay={handlePlay}
-              />
-            </div>
+        {/* Main content */}
+        <div style={{ flex: 1, overflow: "hidden", maxWidth: 1200, width: "100%", margin: "0 auto", padding: "14px 24px", display: "flex", gap: 20 }}>
+          {/* Left: layer stack */}
+          <div style={{ flex: "0 0 420px", minWidth: 280, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            <LayerStack step={step} />
           </div>
 
-          {/* Step dots */}
-          <div style={{ marginTop: 24, display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
-            {STEPS.map((s, i) => (
-              <button key={i} onClick={() => { setPlaying(false); setStep(i); }} title={s.title.replace(/①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬/, "")} style={{
-                width: 28, height: 28, borderRadius: "50%", border: `2px solid ${i === step ? (s.phase === "request" ? th.blue : th.green) : th.border}`,
-                background: i === step ? (s.phase === "request" ? th.blue : th.green) : i < step ? (s.phase === "request" ? th.blueSoft : th.greenSoft) : th.panel,
-                color: i === step ? "#fff" : th.muted,
-                fontFamily: mono, fontSize: 10, fontWeight: 700, cursor: "pointer",
-                transition: "all 0.2s",
-              }}>
-                {i + 1}
-              </button>
-            ))}
-          </div>
-          <div style={{ textAlign: "center", marginTop: 8, display: "flex", gap: 20, justifyContent: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: th.muted }}>
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: th.blue }} /> Request (1–9)
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: th.muted }}>
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: th.green }} /> Response (10–13)
+          {/* Right: step details + step dots */}
+          <div style={{ flex: 1, minWidth: 260, display: "flex", flexDirection: "column", gap: 12, overflow: "hidden" }}>
+            <StepDetail
+              step={step}
+              total={STEPS.length}
+              onPrev={() => { setPlaying(false); setStep(s => Math.max(0, s - 1)); }}
+              onNext={() => { setPlaying(false); setStep(s => Math.min(STEPS.length - 1, s + 1)); }}
+              playing={playing}
+              onPlay={handlePlay}
+            />
+            {/* Step dots */}
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap", flexShrink: 0 }}>
+              {STEPS.map((s, i) => (
+                <button key={i} onClick={() => { setPlaying(false); setStep(i); }} title={s.title} style={{
+                  width: 26, height: 26, borderRadius: "50%", border: `2px solid ${i === step ? (s.phase === "request" ? th.blue : th.green) : th.border}`,
+                  background: i === step ? (s.phase === "request" ? th.blue : th.green) : i < step ? (s.phase === "request" ? th.blueSoft : th.greenSoft) : th.panel,
+                  color: i === step ? "#fff" : th.muted,
+                  fontFamily: mono, fontSize: 10, fontWeight: 700, cursor: "pointer",
+                  transition: "all 0.2s",
+                }}>
+                  {i + 1}
+                </button>
+              ))}
             </div>
           </div>
         </div>

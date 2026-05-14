@@ -296,7 +296,7 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: "'Courier New', monospace", background: theme.bg, minHeight: "100vh", color: theme.text, padding: "0 0 40px" }}>
-      <h2 className="sr-only">Page Replacement Algorithm Visualizer</h2>
+      
 
       <div style={{ padding: "16px 24px", maxWidth: 900, margin: "0 auto" }}>
 
@@ -306,7 +306,7 @@ export default function App() {
             <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 2 8h1v5a1 1 0 0 0 1 1h2.5a.5.5 0 0 0 .5-.5V11h2v2.5a.5.5 0 0 0 .5.5H11a1 1 0 0 0 1-1V8h1a.5.5 0 0 0 .354-.854l-6-6z"/></svg>
           </a>
           <div>
-            <div style={{ fontWeight: 700, fontSize: 16, color: theme.text, letterSpacing: 0.3 }}>Page Replacement Visualizer</div>
+            <div style={{ fontWeight: 700, fontSize: 28, color: theme.text, letterSpacing: 0.3 }}>Page Replacement Visualizer</div>
             <div style={{ fontSize: 12, color: theme.muted, marginTop: 1 }}>Step through FIFO, LRU, OPT and more</div>
           </div>
         </div>
