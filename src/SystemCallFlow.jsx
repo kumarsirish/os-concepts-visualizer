@@ -80,15 +80,7 @@ syscall           ; ← CPU trap instruction 🚀`,
     ids: ["kernel-entry"],
     dir: "down", phase: "request",
     title: "③ CPU switches to Kernel Mode",
-    code:
-`// Hardware does this automatically on SYSCALL:
-//  1. Save user rip, rsp → kernel stack
-//  2. Load kernel stack pointer (MSR_LSTAR)
-//  3. Privilege:  Ring 3 → Ring 0  ← mode switch!
-//  4. Jump to kernel entry: entry_SYSCALL_64()
-
-// Kernel reads syscall number from rax:
-sys_call_table[0]  →  sys_read  ✓`,
+    code: null,
     detail: "The SYSCALL instruction causes the CPU to switch from Ring 3 (user mode) to Ring 0 (kernel mode). The kernel now has full hardware access. Your process's state is saved, and the kernel dispatches to sys_read.",
     crossing: "user→kernel",
   },
@@ -313,13 +305,13 @@ function PacketBadge({ dir, phase }) {
   return (
     <div style={{
       display: "inline-flex", alignItems: "center", gap: 5,
-      padding: "3px 10px", borderRadius: 12,
+      padding: "4px 12px", borderRadius: 12,
       background: isRequest ? th.blueSoft : th.greenSoft,
       border: `1px solid ${isRequest ? th.blue : th.green}`,
-      fontSize: 11, fontWeight: 700, color: isRequest ? th.blue : th.green,
+      fontSize: 13, fontWeight: 700, color: isRequest ? th.blue : th.green,
       fontFamily: mono, letterSpacing: 0.5,
     }}>
-      {isRequest ? "▼" : "▲"} {isRequest ? "REQUEST" : "DATA"}
+      {isRequest ? "▼" : "▲"} {isRequest ? "REQUEST" : "RESPONSE"}
     </div>
   );
 }
@@ -329,22 +321,19 @@ function ModeSwitchDivider({ crossing, flashKey }) {
   const active = crossing != null;
   return (
     <div key={flashKey} style={{
-      margin: "4px 0",
-      padding: "7px 14px",
+      margin: "6px 0",
+      padding: "8px 16px",
       background: active ? "#fef9c3" : th.panelAlt,
       border: `2px dashed ${active ? "#ca8a04" : th.border}`,
       borderRadius: 8,
-      display: "flex", alignItems: "center", justifyContent: "space-between",
+      display: "flex", alignItems: "center", gap: 10,
       transition: "background 0.4s, border-color 0.4s",
       animation: active ? "modePulse 0.6s ease" : "none",
     }}>
-      <span style={{ fontSize: 11, fontWeight: 700, color: active ? "#92400e" : th.muted, letterSpacing: 1, fontFamily: mono }}>
-        ⚡ CPU MODE SWITCH
-      </span>
-      <span style={{ fontSize: 11, color: active ? "#92400e" : th.muted, fontFamily: mono }}>
-        {crossing === "user→kernel" ? "Ring 3 → Ring 0 (privilege escalation)" :
-         crossing === "kernel→user" ? "Ring 0 → Ring 3 (SYSRET)" :
-         "Ring 3 ↔ Ring 0 boundary"}
+      <span style={{ fontSize: 14, fontWeight: 700, color: active ? "#92400e" : th.muted, fontFamily: mono }}>
+        ⚡ {active
+          ? (crossing === "user→kernel" ? "Ring 3 → Ring 0" : "Ring 0 → Ring 3")
+          : "CPU MODE SWITCH BOUNDARY"}
       </span>
     </div>
   );
@@ -354,53 +343,36 @@ function ModeSwitchDivider({ crossing, flashKey }) {
 function HwDivider() {
   return (
     <div style={{
-      margin: "4px 0", padding: "7px 14px",
+      margin: "6px 0", padding: "8px 16px",
       background: th.panelAlt, border: `2px dashed ${th.border}`,
-      borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "space-between",
+      borderRadius: 8, display: "flex", alignItems: "center",
     }}>
-      <span style={{ fontSize: 11, fontWeight: 700, color: th.muted, letterSpacing: 1, fontFamily: mono }}>🔩 HARDWARE BOUNDARY</span>
-      <span style={{ fontSize: 11, color: th.muted, fontFamily: mono }}>Software ↔ Physical device</span>
+      <span style={{ fontSize: 14, fontWeight: 700, color: th.muted, fontFamily: mono }}>🔩 HARDWARE BOUNDARY</span>
     </div>
   );
 }
 
 // Single layer card
-function LayerCard({ layer, active, dir, phase, prevZone }) {
+function LayerCard({ layer, active, phase }) {
   const zone = ZONES[layer.zone];
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: 10,
-      padding: "10px 14px",
+      display: "flex", alignItems: "center", gap: 14,
+      padding: "12px 16px",
       borderRadius: 8,
       border: `2px solid ${active ? (phase === "request" ? th.blue : th.green) : zone.border}`,
       background: active ? (phase === "request" ? th.blueSoft : th.greenSoft) : zone.bg,
-      boxShadow: active ? `0 0 0 3px ${phase === "request" ? "#bfdbfe" : "#bbf7d0"}, ${th.shadow}` : "none",
+      boxShadow: active ? `0 0 0 3px ${phase === "request" ? "#bfdbfe" : "#bbf7d0"}` : "none",
       transition: "all 0.3s ease",
       transform: active ? "scale(1.012)" : "scale(1)",
-      position: "relative",
     }}>
-      {/* Direction indicator on active layer */}
-      {active && (
-        <div style={{
-          position: "absolute", left: -14, top: "50%", transform: "translateY(-50%)",
-          width: 10, height: 10, borderRadius: "50%",
-          background: phase === "request" ? th.blue : th.green,
-          boxShadow: `0 0 8px ${phase === "request" ? th.blue : th.green}`,
-          animation: "pulse 0.8s ease-in-out infinite",
-        }} />
-      )}
-      <div style={{ fontSize: 20, flexShrink: 0 }}>{layer.icon}</div>
+      <div style={{ fontSize: 24, flexShrink: 0 }}>{layer.icon}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: active ? (phase === "request" ? th.blue : th.green) : th.text, transition: "color 0.3s" }}>
+        <div style={{ fontSize: 16, fontWeight: 700, color: active ? (phase === "request" ? th.blue : th.green) : th.text, transition: "color 0.3s" }}>
           {layer.label}
         </div>
-        <div style={{ fontSize: 11, color: th.muted, marginTop: 1 }}>{layer.sub}</div>
+        <div style={{ fontSize: 13, color: th.muted, marginTop: 2 }}>{layer.sub}</div>
       </div>
-      {active && (
-        <div style={{ flexShrink: 0 }}>
-          <PacketBadge dir={dir} phase={phase} />
-        </div>
-      )}
     </div>
   );
 }
@@ -444,15 +416,15 @@ function LayerStack({ step }) {
       <div key={zoneName} style={{
         background: zone.bg,
         border: `1px solid ${zone.border}`,
-        borderRadius: 10, padding: "10px 10px 10px 20px", marginBottom: 4,
+        borderRadius: 10, padding: "12px 12px 12px 22px", marginBottom: 4,
       }}>
         {/* Zone label */}
-        <div style={{ fontSize: 11, fontWeight: 700, color: zone.color, letterSpacing: 1.2, marginBottom: 8, fontFamily: mono, display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ width: 8, height: 8, borderRadius: "50%", background: zone.color, display: "inline-block" }} />
+        <div style={{ fontSize: 13, fontWeight: 700, color: zone.color, letterSpacing: 1, marginBottom: 10, fontFamily: mono, display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ width: 9, height: 9, borderRadius: "50%", background: zone.color, display: "inline-block" }} />
           {zone.label} {zone.ring && <span style={{ fontWeight: 400, color: th.muted }}>({zone.ring})</span>}
         </div>
         {/* Layer cards */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {zoneLayers.map(layer => (
             <LayerCard
               key={layer.id}
@@ -480,51 +452,26 @@ function StepDetail({ step, total, onPrev, onNext, playing, onPlay }) {
   const isRequest = s.phase === "request";
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 14 }}>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 16 }}>
       {/* Progress */}
-      <div style={{ background: th.panel, border: `1px solid ${th.border}`, borderRadius: 8, padding: "12px 16px", boxShadow: th.shadow }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: th.muted, letterSpacing: 1, fontFamily: mono }}>STEP {step + 1} / {total}</span>
+      <div style={{ background: th.panel, border: `1px solid ${th.border}`, borderRadius: 8, padding: "14px 18px", boxShadow: th.shadow }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: th.muted, letterSpacing: 1, fontFamily: mono }}>STEP {step + 1} / {total}</span>
           <PacketBadge dir={s.dir} phase={s.phase} />
         </div>
-        {/* Progress bar */}
-        <div style={{ height: 4, background: th.panelAlt, borderRadius: 2, overflow: "hidden" }}>
-          <div style={{ height: "100%", borderRadius: 2, background: isRequest ? th.blue : th.green, width: `${((step + 1) / total) * 100}%`, transition: "width 0.3s ease" }} />
-        </div>
-        {/* Phase label */}
-        <div style={{ fontSize: 11, color: th.muted, marginTop: 6, fontFamily: mono }}>
-          Phase: <strong style={{ color: isRequest ? th.blue : th.green }}>{isRequest ? "→ Request (going down)" : "← Response (coming up)"}</strong>
+        <div style={{ height: 5, background: th.panelAlt, borderRadius: 3, overflow: "hidden" }}>
+          <div style={{ height: "100%", borderRadius: 3, background: isRequest ? th.blue : th.green, width: `${((step + 1) / total) * 100}%`, transition: "width 0.3s ease" }} />
         </div>
       </div>
 
       {/* Title + detail */}
-      <div style={{ background: th.panel, border: `1px solid ${th.border}`, borderRadius: 8, padding: "14px 16px", boxShadow: th.shadow }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: th.text, marginBottom: 10, fontFamily: mono }}>{s.title}</div>
-        <div style={{ fontSize: 13, color: th.muted, lineHeight: 1.75 }}>{s.detail}</div>
-        {s.crossing && (
-          <div style={{ marginTop: 10, padding: "8px 12px", background: "#fef9c3", border: "1px solid #ca8a04", borderRadius: 6, fontSize: 12, fontWeight: 700, color: "#92400e", fontFamily: mono }}>
-            ⚡ CPU mode switch: {s.crossing === "user→kernel" ? "User Mode → Kernel Mode" : "Kernel Mode → User Mode"}
-          </div>
-        )}
-      </div>
-
-      {/* Code block */}
-      <div style={{ background: "#1e1e2e", border: `1px solid #3d3d5c`, borderRadius: 8, overflow: "hidden", boxShadow: th.shadow }}>
-        <div style={{ padding: "8px 14px", borderBottom: "1px solid #3d3d5c", display: "flex", alignItems: "center", gap: 6 }}>
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57" }} />
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e" }} />
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840" }} />
-          <span style={{ marginLeft: 8, fontSize: 11, color: "#888", fontFamily: mono }}>
-            {isRequest ? "↓ system call path" : "↑ return path"}
-          </span>
-        </div>
-        <pre style={{ margin: 0, padding: "14px 16px", fontFamily: mono, fontSize: 12, lineHeight: 1.75, color: "#cdd6f4", overflowX: "auto", whiteSpace: "pre" }}>
-          {s.code}
-        </pre>
+      <div style={{ background: th.panel, border: `1px solid ${th.border}`, borderRadius: 8, padding: "18px 20px", boxShadow: th.shadow }}>
+        <div style={{ fontSize: 20, fontWeight: 700, color: th.text, marginBottom: 12, fontFamily: mono }}>{s.title}</div>
+        <div style={{ fontSize: 15, color: th.muted, lineHeight: 1.8 }}>{s.detail}</div>
       </div>
 
       {/* Navigation */}
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
         <button onClick={onPrev} disabled={step === 0} style={{
           ...navBtn, opacity: step === 0 ? 0.4 : 1,
         }}>◀ Prev</button>
@@ -532,98 +479,30 @@ function StepDetail({ step, total, onPrev, onNext, playing, onPlay }) {
           ...navBtn,
           background: playing ? th.redSoft : th.greenSoft,
           borderColor: playing ? th.red : th.green,
-          color: th.text, minWidth: 90,
+          color: th.text, minWidth: 100,
         }}>
           {playing ? "⏸ Pause" : "▶ Play"}
         </button>
         <button onClick={onNext} disabled={step === total - 1} style={{
           ...navBtn, opacity: step === total - 1 ? 0.4 : 1,
         }}>Next ▶</button>
-        <span style={{ marginLeft: "auto", fontSize: 12, color: th.muted, fontFamily: mono }}>
-          {step < 8 ? "→ request" : "← response"}
-        </span>
       </div>
     </div>
   );
 }
 
 const navBtn = {
-  padding: "8px 14px", borderRadius: 6, border: `1px solid ${th.border}`,
+  padding: "10px 18px", borderRadius: 6, border: `1px solid ${th.border}`,
   background: th.panelAlt, color: th.text, fontFamily: mono,
-  fontSize: 13, fontWeight: 700, cursor: "pointer",
+  fontSize: 15, fontWeight: 700, cursor: "pointer",
 };
 
-// ─── Syscall selector ─────────────────────────────────────────────────────────
-const SYSCALL_EXAMPLES = [
-  { label: "read()", num: 0,  desc: "Read bytes from a file descriptor" },
-  { label: "write()", num: 1, desc: "Write bytes to a file descriptor" },
-  { label: "open()", num: 2,  desc: "Open or create a file, returns fd" },
-  { label: "close()", num: 3, desc: "Close a file descriptor" },
-];
-
-function SyscallBanner({ selected, onSelect }) {
-  return (
-    <div style={{ background: th.panel, border: `1px solid ${th.border}`, borderRadius: 8, padding: "12px 16px", marginBottom: 16, boxShadow: th.shadow }}>
-      <div style={{ fontSize: 11, fontWeight: 700, color: th.muted, letterSpacing: 1, marginBottom: 10, fontFamily: mono }}>DEMO SYSCALL</div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {SYSCALL_EXAMPLES.map(sc => (
-          <button key={sc.label} onClick={() => onSelect(sc)} style={{
-            padding: "6px 14px", borderRadius: 6, border: `1px solid ${selected.label === sc.label ? th.blue : th.border}`,
-            background: selected.label === sc.label ? th.blueSoft : th.panelAlt,
-            color: selected.label === sc.label ? th.blue : th.text,
-            fontFamily: mono, fontSize: 13, fontWeight: 700, cursor: "pointer",
-          }}>
-            {sc.label}
-            <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 400, color: selected.label === sc.label ? th.blue : th.muted }}>
-              #{sc.num}
-            </span>
-          </button>
-        ))}
-      </div>
-      <div style={{ fontSize: 12, color: th.muted, marginTop: 8, fontFamily: mono }}>
-        <strong style={{ color: th.text }}>rax = {selected.num}</strong> — {selected.desc} &nbsp;|&nbsp; All file syscalls follow the same kernel path shown below.
-      </div>
-    </div>
-  );
-}
-
-// ─── Mini call stack tracker ──────────────────────────────────────────────────
-function CallStack({ step }) {
-  const s = STEPS[step];
-  // Build a virtual call stack from current state
-  const requestStack = LAYERS
-    .filter(l => {
-      const layerStep = STEPS.findIndex(st => st.ids.includes(l.id) && st.dir === "down");
-      const isReturned = s.dir === "up" && STEPS.slice(0, step + 1).some(st => st.ids.includes(l.id) && st.dir === "up" && STEPS.indexOf(st) <= step);
-      return layerStep !== -1 && layerStep <= step && !isReturned;
-    })
-    .reverse();
-
-  if (requestStack.length === 0) return null;
-
-  return (
-    <div style={{ background: th.panel, border: `1px solid ${th.border}`, borderRadius: 8, padding: "12px 16px", boxShadow: th.shadow }}>
-      <div style={{ fontSize: 11, fontWeight: 700, color: th.muted, letterSpacing: 1, marginBottom: 8, fontFamily: mono }}>CALL STACK (simplified)</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-        {requestStack.map((l, i) => (
-          <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: `${(i + 1) * 10}px`, height: 1, background: th.border, flexShrink: 0 }} />
-            <div style={{ fontSize: 12, fontFamily: mono, color: i === 0 ? th.blue : th.muted, fontWeight: i === 0 ? 700 : 400 }}>
-              {i === 0 ? "► " : "  "}{l.label}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // ─── Root export ──────────────────────────────────────────────────────────────
 export default function SystemCallFlow() {
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed] = useState(2200);
-  const [selectedSyscall, setSelectedSyscall] = useState(SYSCALL_EXAMPLES[0]);
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -663,8 +542,8 @@ export default function SystemCallFlow() {
           <div style={{ maxWidth: 1080, margin: "0 auto", display: "flex", alignItems: "center", gap: 12 }}>
             <HomeButton />
             <div>
-              <div style={{ fontWeight: 700, fontSize: 18, color: th.text }}>System Call Flow</div>
-              <div style={{ fontSize: 12, color: th.muted, marginTop: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: 22, color: th.text }}>System Call Flow</div>
+              <div style={{ fontSize: 14, color: th.muted, marginTop: 2 }}>
                 How open/read/write cross from user space into the Linux kernel and back
               </div>
             </div>
@@ -672,13 +551,6 @@ export default function SystemCallFlow() {
         </div>
 
         <div style={{ maxWidth: 1080, margin: "0 auto", padding: "20px 24px 48px" }}>
-          {/* Concept banner */}
-          <div style={{ background: th.purpleSoft, border: `1px solid ${th.purple}`, borderRadius: 8, padding: "12px 18px", marginBottom: 16, fontSize: 13, color: th.text, lineHeight: 1.75 }}>
-            <strong>What is a System Call?</strong> User programs run in <em>restricted</em> CPU mode (Ring 3) and cannot directly access hardware, files, or network. To do so they call the OS kernel via a <strong>system call</strong> — a controlled door from user space into kernel space. The CPU privilege level changes, the kernel does the work, then returns data back to the program.
-          </div>
-
-          {/* Syscall selector */}
-          <SyscallBanner selected={selectedSyscall} onSelect={sc => { setSelectedSyscall(sc); setStep(0); setPlaying(false); }} />
 
           {/* Main content: two columns */}
           <div style={{ display: "flex", gap: 20, alignItems: "flex-start", flexWrap: "wrap" }}>
@@ -700,7 +572,6 @@ export default function SystemCallFlow() {
                 playing={playing}
                 onPlay={handlePlay}
               />
-              <CallStack step={step} />
             </div>
           </div>
 
