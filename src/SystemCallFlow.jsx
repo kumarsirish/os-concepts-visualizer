@@ -497,6 +497,22 @@ const navBtn = {
 };
 
 
+function VisitorCount({ page }) {
+  const [count, setCount] = useState(null);
+  useEffect(() => {
+    fetch(`https://api.counterapi.dev/v1/os-concepts-lab/${page}/up`)
+      .then(r => r.json())
+      .then(d => setCount(d.count))
+      .catch(() => {});
+  }, []);
+  if (count === null) return null;
+  return (
+    <div style={{ marginLeft: "auto", fontSize: 13, display: "flex", alignItems: "center", gap: 5 }}>
+      👁 {count.toLocaleString()} views
+    </div>
+  );
+}
+
 // ─── Root export ──────────────────────────────────────────────────────────────
 export default function SystemCallFlow() {
   const [step, setStep] = useState(0);
@@ -544,6 +560,7 @@ export default function SystemCallFlow() {
               <div style={{ fontWeight: 700, fontSize: 28, color: th.text }}>System Call Flow</div>
               <div style={{ fontSize: 12, color: th.muted, marginTop: 1 }}>How open/read/write cross from user space into the Linux kernel and back</div>
             </div>
+            <VisitorCount page="system-call-flow" />
           </div>
         </div>
 

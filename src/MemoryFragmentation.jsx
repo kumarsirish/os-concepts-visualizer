@@ -494,6 +494,22 @@ function InternalTab() {
   );
 }
 
+function VisitorCount({ page }) {
+  const [count, setCount] = useState(null);
+  useEffect(() => {
+    fetch(`https://api.counterapi.dev/v1/os-concepts-lab/${page}/up`)
+      .then(r => r.json())
+      .then(d => setCount(d.count))
+      .catch(() => {});
+  }, []);
+  if (count === null) return null;
+  return (
+    <div style={{ marginLeft: "auto", fontSize: 13, color: "#64748B", display: "flex", alignItems: "center", gap: 5 }}>
+      👁 {count.toLocaleString()} views
+    </div>
+  );
+}
+
 // ─── App Shell ────────────────────────────────────────────────────────────────
 export default function App() {
   const [tab, setTab] = useState("external");
@@ -533,6 +549,7 @@ export default function App() {
             Interactive OS memory management demo
           </div>
         </div>
+        <VisitorCount page="memory-fragmentation" />
       </div>
 
       {/* Tabs */}

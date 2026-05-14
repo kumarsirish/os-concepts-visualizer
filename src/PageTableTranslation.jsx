@@ -408,6 +408,22 @@ function SegmentationTab() {
   );
 }
 
+function VisitorCount({ page }) {
+  const [count, setCount] = useState(null);
+  useEffect(() => {
+    fetch(`https://api.counterapi.dev/v1/os-concepts-lab/${page}/up`)
+      .then(r => r.json())
+      .then(d => setCount(d.count))
+      .catch(() => {});
+  }, []);
+  if (count === null) return null;
+  return (
+    <div style={{ marginLeft: "auto", fontSize: 13, color: t.muted, display: "flex", alignItems: "center", gap: 5 }}>
+      👁 {count.toLocaleString()} views
+    </div>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // ROOT
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -425,6 +441,7 @@ export default function PageTableTranslation() {
               <div style={{ fontWeight: 700, fontSize: 28, color: t.text }}>Address Translation</div>
               <div style={{ fontSize: 12, color: t.muted, marginTop: 1 }}>8-bit address space · interactive visualizer</div>
             </div>
+            <VisitorCount page="address-translation" />
           </div>
           {/* Tab bar */}
           <div style={{ display: "flex", gap: 0 }}>

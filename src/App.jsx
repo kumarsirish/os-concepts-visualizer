@@ -234,6 +234,22 @@ const theme = {
   shadow: "0 10px 30px rgba(31, 35, 40, 0.08)",
 };
 
+function VisitorCount({ page }) {
+  const [count, setCount] = useState(null);
+  useEffect(() => {
+    fetch(`https://api.counterapi.dev/v1/os-concepts-lab/${page}/up`)
+      .then(r => r.json())
+      .then(d => setCount(d.count))
+      .catch(() => {});
+  }, []);
+  if (count === null) return null;
+  return (
+    <div style={{ marginLeft: "auto", fontSize: 13, color: theme.muted, display: "flex", alignItems: "center", gap: 5 }}>
+      👁 {count.toLocaleString()} views
+    </div>
+  );
+}
+
 export default function App() {
   const [pageInput, setPageInput] = useState("7 0 1 2 0 3 0 4 2 3 0 3 2");
   const [frameCount, setFrameCount] = useState(3);
@@ -309,6 +325,7 @@ export default function App() {
             <div style={{ fontWeight: 700, fontSize: 28, color: theme.text, letterSpacing: 0.3 }}>Page Replacement Visualizer</div>
             <div style={{ fontSize: 12, color: theme.muted, marginTop: 1 }}>Step through FIFO, LRU, OPT and more</div>
           </div>
+          <VisitorCount page="page-replacement" />
         </div>
 
         {/* Algorithm selector */}

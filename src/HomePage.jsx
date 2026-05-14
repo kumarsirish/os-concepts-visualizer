@@ -57,7 +57,7 @@ export default function HomePage() {
         </div>
 
         {/* Footer */}
-        <div style={{ marginTop: "auto", borderTop: "1px solid #d0d7de", padding: "16px 40px", textAlign: "center", fontSize: 12, color: "#888", background: "#fff" }}>
+        <div style={{ marginTop: "auto", borderTop: "1px solid #d0d7de", padding: "16px 40px", textAlign: "center", fontSize: 14, color: "#000000ff", background: "#fff" }}>
           OS Concepts Lab — built for CMRIT AIML undergrad students
         </div>
       </div>
