@@ -499,10 +499,10 @@ function VisitorCount({ page }) {
   useEffect(() => {
     fetch(`https://api.counterapi.dev/v1/os-concepts-lab/${page}/up`)
       .then(r => r.json())
-      .then(d => setCount(d.count))
+      .then(d => { if (typeof d.count === "number") setCount(d.count); })
       .catch(() => {});
   }, []);
-  if (count === null) return null;
+  if (count == null) return null;
   return (
     <div style={{ marginLeft: "auto", fontSize: 13, color: "#64748B", display: "flex", alignItems: "center", gap: 5 }}>
       👁 {count.toLocaleString()} views
@@ -542,7 +542,7 @@ export default function App() {
         </a>
         <div style={{ fontSize: 28 }}>🧠</div>
         <div>
-          <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 28, color: "#F1F5F9", letterSpacing: "-0.01em" }}>
+          <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 28, color: "#F1F5F9", letterSpacing: "-0.01em", lineHeight: 1.4 }}>
             Memory Fragmentation Simulator
           </div>
           <div style={{ fontSize: 12, color: "#64748B", marginTop: 1 }}>

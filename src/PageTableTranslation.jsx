@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const t = {
   bg: "#f6f8fb", panel: "#ffffff", panelAlt: "#f3f6fa",
@@ -413,10 +413,10 @@ function VisitorCount({ page }) {
   useEffect(() => {
     fetch(`https://api.counterapi.dev/v1/os-concepts-lab/${page}/up`)
       .then(r => r.json())
-      .then(d => setCount(d.count))
+      .then(d => { if (typeof d.count === "number") setCount(d.count); })
       .catch(() => {});
   }, []);
-  if (count === null) return null;
+  if (count == null) return null;
   return (
     <div style={{ marginLeft: "auto", fontSize: 13, color: t.muted, display: "flex", alignItems: "center", gap: 5 }}>
       👁 {count.toLocaleString()} views

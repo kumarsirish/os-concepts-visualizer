@@ -239,10 +239,10 @@ function VisitorCount({ page }) {
   useEffect(() => {
     fetch(`https://api.counterapi.dev/v1/os-concepts-lab/${page}/up`)
       .then(r => r.json())
-      .then(d => setCount(d.count))
+      .then(d => { if (typeof d.count === "number") setCount(d.count); })
       .catch(() => {});
   }, []);
-  if (count === null) return null;
+  if (count == null) return null;
   return (
     <div style={{ marginLeft: "auto", fontSize: 13, color: theme.muted, display: "flex", alignItems: "center", gap: 5 }}>
       👁 {count.toLocaleString()} views
